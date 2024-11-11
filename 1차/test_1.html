@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 교차로 제어 시스템</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: url('./images/image.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            background-color: #A0B9B7;
+            transition: background-position 1s ease, background-color 0.5s ease;
+        }
+
+        .header-title {
+            color: #FAF6E8;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+            font-size: 2.5rem;
+        }
+
+        footer {
+            color: #ffffff;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 0.9rem;
+            background-color: rgba(0, 0, 0, 0.6);
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            max-width: 300px;
+        }
+
+        .loading-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            color: #f39c12;
+            font-size: 1.5rem;
+            background-color: #A0B9B7;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            border: 6px solid rgba(255, 255, 255, 0.3);
+            border-top: 6px solid #f39c12;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        button {
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .button-auto {
+            background-color: #28a745;
+        }
+
+        .button-manual {
+            background-color: #ffc107;
+        }
+
+        .button-guide {
+            background-color: #dc3545;
+        }
+
+        .button-exit {
+            background-color: #6f42c1;
+        }
+
+        .button-auto:hover {
+            background-color: #218838;
+        }
+
+        .button-manual:hover {
+            background-color: #e0a800;
+        }
+
+        .button-guide:hover {
+            background-color: #c82333;
+        }
+
+        .button-exit:hover {
+            background-color: #59369d;
+        }
+    </style>
+</head>
+<body id="body">
+    <header>
+        <h1 class="header-title" id="headerTitle">교차로 제어 시스템</h1>
+    </header>
+
+    <main>
+        <section class="button-container" id="buttonContainer">
+            <button class="button-auto" onclick="displayMessageAndMove('모드 실행 중입니다. 잠시만 기다려주세요...', 135)">자동 모드</button>
+            <button class="button-manual" onclick="displayMessageAndMove('모드 실행 중입니다. 잠시만 기다려주세요...', 225)">수동 모드</button>
+            <button class="button-guide" onclick="displayMessageAndMove('사용설명서로 이동 중입니다...', 45)">사용 설명서</button>
+            <button class="button-exit" onclick="displayMessageAndMove('프로그램이 종료 중입니다...', 315)">종료</button>
+        </section>
+
+        <section class="loading-container" id="loadingContainer">
+            <p id="loadingText">모드 실행 중입니다. 잠시만 기다려주세요...</p>
+            <div class="spinner"></div>
+        </section>
+    </main>
+
+    <footer id="footer">
+        <p>© 2024 Cross Road. 제작자: 김채운, 김병현, 김태우, 라원준, 남궁동근</p>
+    </footer>
+
+    <script>
+        function displayMessageAndMove(message, direction) {
+            document.getElementById('buttonContainer').style.display = 'none';
+            document.getElementById('headerTitle').style.opacity = '0';
+            document.getElementById('footer').style.opacity = '0';
+
+            document.body.style.transition = 'background-position 1s ease';
+            switch (direction) {
+                case 135:
+                    document.body.style.backgroundPosition = '100vw 100vh';
+                    break;
+                case 225:
+                    document.body.style.backgroundPosition = '-100vw 100vh';
+                    break;
+                case 45:
+                    document.body.style.backgroundPosition = '100vw -100vh';
+                    break;
+                case 315:
+                    document.body.style.backgroundPosition = '-100vw -100vh';
+                    break;
+            }
+
+            setTimeout(() => {
+                document.getElementById('loadingContainer').style.display = 'flex';
+                document.getElementById('loadingText').innerText = message;
+
+                setTimeout(() => {
+                    window.open('example.html', '_blank', 'width=800,height=600');
+                    document.body.style.backgroundPosition = 'center center';
+                    document.body.style.backgroundColor = '';
+                    document.getElementById('loadingContainer').style.display = 'none';
+                    document.getElementById('buttonContainer').style.display = 'flex';
+                    document.getElementById('headerTitle').style.opacity = '1';
+                    document.getElementById('footer').style.opacity = '1';
+                }, 1000);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
